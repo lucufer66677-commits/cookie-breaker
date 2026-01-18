@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cookie Breaker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="bakeryHeader">
+  <h1>🍪 Cookie Breaker</h1>
+  <div id="bakeryDecor">
+    <span class="decor-item item-1">🍪</span>
+    <span class="decor-item item-2">🍰</span>
+    <span class="decor-item item-3">🥖</span>
+    <span class="decor-item item-4">🧁</span>
+    <span class="decor-item item-5">🍪</span>
+    <span class="decor-item item-6">🥐</span>
+    <span class="decor-item item-7">🍰</span>
+    <span class="decor-item item-8">🍪</span>
+  </div>
+</div>
+
+<div id="info">
+  <div>Target: <span id="target">0</span></div>
+  <div>Taps: <span id="taps">0</span></div>
+  <div>Missed: <span id="missed">0</span></div>
+  <div>❤️ <span id="lives">3</span></div>
+  <div>⏱️ <span id="time">30</span></div>
+  <div>💰 <span id="coins">0</span></div>
+  <div id="bombDisplay" style="display: none;">💣 <span id="bombCount">0</span></div>
+  <button onclick="toggleMusic()">🎵</button>
+  <button onclick="openShop()">🛍️</button>
+  <button id="bombBtn" onclick="useBomb()" style="display: none; background: linear-gradient(135deg, #FF6B35, #FF8C42); border: 2px solid #FFD700; color: white; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">💣 USE (Space)</button>
+</div>
+
+<button id="levelSelectBtn" onclick="openLevelPanel()" title="Select Level">📋</button>
+
+<div id="levelPanel">
+  <div id="levelPanelContent">
+    <div id="levelPanelHeader">
+      <h2>Select Level</h2>
+      <button onclick="closeLevelPanel()" class="close-btn">✕</button>
+    </div>
+    <div id="levelGrid"></div>
+  </div>
+</div>
+
+<div id="missFeedback"></div>
+
+<div id="game"></div>
+
+<div id="comboDisplay">
+  <div id="comboText"></div>
+</div>
+
+<div id="resultBox">
+  <div id="resultContent">
+    <div id="resultText"></div>
+    <div id="resultStars"></div>
+    <div id="resultButtons">
+      <button onclick="replayLevel()" class="result-btn replay-btn">↻ Replay</button>
+      <button onclick="nextLevel()" class="result-btn next-btn">Next Level →</button>
+    </div>
+  </div>
+</div>
+
+<div id="instructionsBox">
+  <div id="instructionsContent">
+    <h2>How to Play</h2>
+    <div id="instructionsBody">
+      <div class="instruction-section">
+        <h3>✅ TAP THESE (Good Items)</h3>
+        <div class="item-list">
+          <div class="instruction-item">🍪 Cookie</div>
+          <div class="instruction-item">🍰 Cake</div>
+          <div class="instruction-item">🥖 Bread</div>
+      </div>
+      </div>
+      <div class="instruction-section">
+        <h3>❌ AVOID THESE (Bad Items)</h3>
+        <div class="item-list">
+          <div class="instruction-item">🍩 Donut</div>
+          <div class="instruction-item">🍕 Pizza</div>
+        </div>
+      </div>
+    </div>
+    <button onclick="showDifficulty()" class="start-btn">Start Game</button>
+  </div>
+</div>
+
+<div id="difficultyBox">
+  <div id="difficultyContent">
+    <h2>Select Difficulty</h2>
+    <div class="difficulty-buttons">
+      <button onclick="selectDifficulty('easy')" class="difficulty-btn easy-btn">
+        <div class="difficulty-title">🟢 EASY</div>
+        <div class="difficulty-desc">Slow speed<br>5 Lives</div>
+      </button>
+      <button onclick="selectDifficulty('normal')" class="difficulty-btn normal-btn">
+        <div class="difficulty-title">🟡 NORMAL</div>
+        <div class="difficulty-desc">Regular speed<br>3 Lives</div>
+      </button>
+      <button onclick="selectDifficulty('hard')" class="difficulty-btn hard-btn">
+        <div class="difficulty-title">🔴 HARD</div>
+        <div class="difficulty-desc">Fast speed<br>2 Lives</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="dailyRewardBox">
+  <div id="dailyRewardContent">
+    <div style="font-size: 60px; margin-bottom: 20px;">💰</div>
+    <h2>Daily Reward Claimed!</h2>
+    <div id="rewardMessage" style="font-size: 18px; margin: 20px 0; color: #FFD700;">+50 Coins</div>
+    <button onclick="closeDailyReward()" class="start-btn">Awesome!</button>
+  </div>
+</div>
+
+<div id="tutorialBox">
+  <div id="tutorialContent">
+    <div id="tutorialText">Tap the cookie 🍪, avoid others</div>
+  </div>
+</div>
+
+<div id="shopBox">
+  <div id="shopContent">
+    <div id="shopHeader">
+      <h2>🛍️ Shop</h2>
+      <button onclick="closeShop()" class="close-btn">✕</button>
+    </div>
+    
+    <div id="shopTabs">
+      <button onclick="switchShopTab('items')" class="shop-tab active" id="tab-items">Items</button>
+      <button onclick="switchShopTab('themes')" class="shop-tab" id="tab-themes">Themes</button>
+    </div>
+
+    <div id="itemsSection" class="shop-section active">
+      <div class="shop-items-grid" id="shopItemsGrid">
+        <!-- Items will be added here via JavaScript -->
+      </div>
+    </div>
+
+    <div id="themesSection" class="shop-section">
+      <div class="theme-buttons">
+        <button onclick="setTheme('dark')" class="theme-btn dark-theme-btn">
+          <div class="theme-icon">🌙</div>
+          <div class="theme-name">Dark</div>
+          <div class="theme-desc">Classic dark theme</div>
+        </button>
+        <button onclick="setTheme('candy')" class="theme-btn candy-theme-btn">
+          <div class="theme-icon">🍬</div>
+          <div class="theme-name">Candy</div>
+          <div class="theme-desc">Colorful candy theme</div>
+        </button>
+        <button onclick="setTheme('bakery')" class="theme-btn bakery-theme-btn">
+          <div class="theme-icon">🍰</div>
+          <div class="theme-name">Bakery</div>
+          <div class="theme-desc">Warm bakery theme</div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- THEMES SHOP SECTION -->
+<div class="shop-section">
+  <h3 class="shop-title">🎨 Candy Themes</h3>
+
+  <div class="theme-grid">
+
+    <div class="theme-card" onclick="buyTheme('strawberry', 50)">
+      <div class="theme-preview strawberry"></div>
+      <h4>🍓 Strawberry Candy</h4>
+      <p>50 Coins</p>
+    </div>
+
+    <div class="theme-card" onclick="buyTheme('blueberry', 50)">
+      <div class="theme-preview blueberry"></div>
+      <h4>🫐 Blueberry Candy</h4>
+      <p>50 Coins</p>
+    </div>
+
+    <div class="theme-card" onclick="buyTheme('vanilla', 40)">
+      <div class="theme-preview vanilla"></div>
+      <h4>🍦 Vanilla Candy</h4>
+      <p>40 Coins</p>
+    </div>
+
+    <div class="theme-card" onclick="buyTheme('chocolate', 60)">
+      <div class="theme-preview chocolate"></div>
+      <h4>🍫 Chocolate Candy</h4>
+      <p>60 Coins</p>
+    </div>
+
+    <div class="theme-card" onclick="buyTheme('rainbow', 80)">
+      <div class="theme-preview rainbow"></div>
+      <h4>🌈 Rainbow Candy</h4>
+      <p>80 Coins</p>
+    </div>
+
+    <div class="theme-card" onclick="buyTheme('neon', 100)">
+      <div class="theme-preview neon"></div>
+      <h4>💡 Neon Candy</h4>
+      <p>100 Coins</p>
+    </div>
+
+    <div class="theme-card" onclick="buyTheme('ice', 70)">
+      <div class="theme-preview ice"></div>
+      <h4>❄️ Ice Candy</h4>
+      <p>70 Coins</p>
+    </div>
+
+    <div class="theme-card" onclick="buyTheme('bubblegum', 60)">
+      <div class="theme-preview bubblegum"></div>
+      <h4>🍬 Bubblegum Candy</h4>
+      <p>60 Coins</p>
+    </div>
+
+  </div>
+</div>
+
+<div id="purchaseFeedback">
+  <div id="purchaseFeedbackContent"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
+ 
