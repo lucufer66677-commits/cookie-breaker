@@ -935,8 +935,10 @@ function startLevel(level, resetLives) {
   
   // custom Round 1 adjustments
   if (level === 1) {
-    lives = 2; // start with 2 hearts
-    targetCookies = 15; // start cookie count 15
+    // core mechanics for round 1 should always apply regardless of difficulty
+    initialLives = 2;              // ensure future resets also use 2
+    lives = 2;                      // start with 2 hearts
+    targetCookies = 15;            // start cookie count is exactly 15
     document.getElementById("lives").innerText = lives;
     document.getElementById("target").innerText = targetCookies;
   }
@@ -1173,7 +1175,7 @@ function createGoldenParticles(x, y) {
     
     const angle = (i / particleCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
     const distance = 60 + Math.random() * 150;
-  const tx = Math.cos(angle) * distance;
+    const tx = Math.cos(angle) * distance;
     const ty = Math.sin(angle) * distance - 40;
     
     const fontSize = 14 + Math.random() * 18;
@@ -1375,4 +1377,3 @@ loadUnlockedThemes();
 
 // Initialize level grid
 renderLevelGrid();
-
