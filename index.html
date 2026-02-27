@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Cookie Breaker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,9 +30,10 @@
   <div>⏱️ <span id="time">30</span></div>
   <div>💰 <span id="coins">0</span></div>
   <div id="bombDisplay" style="display: none;">💣 <span id="bombCount">0</span></div>
+  <div id="magnetDisplay" style="display: none;">🧲 <span id="magnetTimer">0</span>s</div>
   <button onclick="toggleMusic()">🎵</button>
   <button onclick="openShop()">🛍️</button>
-  <button id="bombBtn" onclick="useBomb()" style="display: none; background: linear-gradient(135deg, #FF6B35, #FF8C42); border: 2px solid #FFD700; color: white; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">💣 USE (Space)</button>
+  <button id="bombBtn" onclick="useBomb()" style="display: none;">💣 USE (Space)</button>
 </div>
 
 <button id="levelSelectBtn" onclick="openLevelPanel()" title="Select Level">📋</button>
@@ -61,6 +63,159 @@
     <div id="resultButtons">
       <button onclick="replayLevel()" class="result-btn replay-btn">↻ Replay</button>
       <button onclick="nextLevel()" class="result-btn next-btn">Next Level →</button>
+    </div>
+  </div>
+</div>
+
+<div id="howToPlayBox" class="overlay-box">
+  <div id="howToPlayContent" class="overlay-content">
+    <div class="how-to-header">
+      <h1>📖 How To Play</h1>
+      <p class="how-to-subtitle">Master the three rounds to become a Cookie Champion!</p>
+    </div>
+
+    <div class="how-to-body">
+      <!-- ROUND 1 -->
+      <div class="round-section round-1-section">
+        <div class="round-badge">🥉 ROUND 1</div>
+        <h2>Basic Cookie Tapping</h2>
+        
+        <div class="rule-group">
+          <div class="rule-item correct-rule">
+            <span class="rule-icon">✅</span>
+            <div class="rule-content">
+              <span class="rule-title">Tap the Target Cookie</span>
+              <span class="rule-desc">Match the target number with taps</span>
+            </div>
+          </div>
+          <div class="rule-item correct-rule">
+            <span class="rule-icon">✅</span>
+            <div class="rule-content">
+              <span class="rule-title">Use 30 Seconds</span>
+              <span class="rule-desc">Complete as many taps as possible</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rule-group">
+          <div class="rule-item wrong-rule">
+            <span class="rule-icon">❌</span>
+            <div class="rule-content">
+              <span class="rule-title">Don't Tap Bad Items</span>
+              <span class="rule-desc">🍩 Donuts & 🍕 Pizza cost hearts</span>
+            </div>
+          </div>
+          <div class="rule-item wrong-rule">
+            <span class="rule-icon">❌</span>
+            <div class="rule-content">
+              <span class="rule-title">Don't Lose All Hearts</span>
+              <span class="rule-desc">Start with 2 lives - Game Over at 0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="round-stats">
+          <div class="stat"><span class="stat-label">Lives:</span> <span class="stat-value">2 ❤️</span></div>
+          <div class="stat"><span class="stat-label">Starting:</span> <span class="stat-value">15 Cookies</span></div>
+        </div>
+      </div>
+
+      <!-- ROUND 2 -->
+      <div class="round-section round-2-section">
+        <div class="round-badge">🥈 ROUND 2</div>
+        <h2>Advanced Challenge</h2>
+        
+        <div class="rule-group">
+          <div class="rule-item correct-rule">
+            <span class="rule-icon">✅</span>
+            <div class="rule-content">
+              <span class="rule-title">Match More Cookies</span>
+              <span class="rule-desc">Target count increases by 5 each level</span>
+            </div>
+          </div>
+          <div class="rule-item correct-rule">
+            <span class="rule-icon">✅</span>
+            <div class="rule-content">
+              <span class="rule-title">Items Spawn Faster</span>
+              <span class="rule-desc">Gameplay speed increases gradually</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rule-group">
+          <div class="rule-item correct-rule">
+            <span class="rule-icon">✅</span>
+            <div class="rule-content">
+              <span class="rule-title">Earn More Coins</span>
+              <span class="rule-desc">Use coins in the Shop for power-ups</span>
+            </div>
+          </div>
+          <div class="rule-item wrong-rule">
+            <span class="rule-icon">❌</span>
+            <div class="rule-content">
+              <span class="rule-title">Can't Change Difficulty</span>
+              <span class="rule-desc">Your difficulty choice carries forward</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="round-stats">
+          <div class="stat"><span class="stat-label">Target:</span> <span class="stat-value">Increases +5</span></div>
+          <div class="stat"><span class="stat-label">Speed:</span> <span class="stat-value">Increases +10%</span></div>
+        </div>
+      </div>
+
+      <!-- ROUND 3 -->
+      <div class="round-section round-3-section">
+        <div class="round-badge">🥇 ROUND 3</div>
+        <h2>Boss Battle Extreme</h2>
+        
+        <div class="rule-group">
+          <div class="rule-item correct-rule">
+            <span class="rule-icon">✅</span>
+            <div class="rule-content">
+              <span class="rule-title">Defeat the Boss</span>
+              <span class="rule-desc">Earn 200 coins as boss reward</span>
+            </div>
+          </div>
+          <div class="rule-item correct-rule">
+            <span class="rule-icon">✅</span>
+            <div class="rule-content">
+              <span class="rule-title">Use Shop Power-ups</span>
+              <span class="rule-desc">💣 Bombs, 🧲 Magnet, 🍪✨ Golden Cookies</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rule-group">
+          <div class="rule-item wrong-rule">
+            <span class="rule-icon">❌</span>
+            <div class="rule-content">
+              <span class="rule-title">No Time Limit</span>
+              <span class="rule-desc">Boss stays until defeated - be strategic!</span>
+            </div>
+          </div>
+          <div class="rule-item wrong-rule">
+            <span class="rule-icon">❌</span>
+            <div class="rule-content">
+              <span class="rule-title">Extreme Difficulty</span>
+              <span class="rule-desc">Boss mode is the hardest challenge</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="round-stats">
+          <div class="stat"><span class="stat-label">Boss Health:</span> <span class="stat-value">5 Hits</span></div>
+          <div class="stat"><span class="stat-label">Reward:</span> <span class="stat-value">💰 200 Coins</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-to-footer">
+      <div class="tip-box">
+        💡 <strong>Pro Tip:</strong> Use the Shop wisely! Power-ups help you progress further and earn more coins.
+      </div>
+      <button onclick="startFromHowToPlay()" class="start-btn how-to-start-btn">🎮 Start Game</button>
     </div>
   </div>
 </div>
@@ -111,9 +266,9 @@
 
 <div id="dailyRewardBox">
   <div id="dailyRewardContent">
-    <div style="font-size: 60px; margin-bottom: 20px;">💰</div>
+    <div class="reward-icon">💰</div>
     <h2>Daily Reward Claimed!</h2>
-    <div id="rewardMessage" style="font-size: 18px; margin: 20px 0; color: #FFD700;">+50 Coins</div>
+    <div id="rewardMessage" class="reward-text">+50 Coins</div>
     <button onclick="closeDailyReward()" class="start-btn">Awesome!</button>
   </div>
 </div>
@@ -143,82 +298,13 @@
     </div>
 
     <div id="themesSection" class="shop-section">
-      <div class="theme-buttons">
-        <button onclick="setTheme('dark')" class="theme-btn dark-theme-btn">
-          <div class="theme-icon">🌙</div>
-          <div class="theme-name">Dark</div>
-          <div class="theme-desc">Classic dark theme</div>
-        </button>
-        <button onclick="setTheme('candy')" class="theme-btn candy-theme-btn">
-          <div class="theme-icon">🍬</div>
-          <div class="theme-name">Candy</div>
-          <div class="theme-desc">Colorful candy theme</div>
-        </button>
-        <button onclick="setTheme('bakery')" class="theme-btn bakery-theme-btn">
-          <div class="theme-icon">🍰</div>
-          <div class="theme-name">Bakery</div>
-          <div class="theme-desc">Warm bakery theme</div>
-        </button>
+      <div id="themeItemsGrid" class="shop-items-grid">
+        <!-- Themes will be generated here via JavaScript -->
       </div>
     </div>
   </div>
 </div>
-<!-- THEMES SHOP SECTION -->
-<div class="shop-section">
-  <h3 class="shop-title">🎨 Candy Themes</h3>
 
-  <div class="theme-grid">
-
-    <div class="theme-card" onclick="buyTheme('strawberry', 50)">
-      <div class="theme-preview strawberry"></div>
-      <h4>🍓 Strawberry Candy</h4>
-      <p>50 Coins</p>
-    </div>
-
-    <div class="theme-card" onclick="buyTheme('blueberry', 50)">
-      <div class="theme-preview blueberry"></div>
-      <h4>🫐 Blueberry Candy</h4>
-      <p>50 Coins</p>
-    </div>
-
-    <div class="theme-card" onclick="buyTheme('vanilla', 40)">
-      <div class="theme-preview vanilla"></div>
-      <h4>🍦 Vanilla Candy</h4>
-      <p>40 Coins</p>
-    </div>
-
-    <div class="theme-card" onclick="buyTheme('chocolate', 60)">
-      <div class="theme-preview chocolate"></div>
-      <h4>🍫 Chocolate Candy</h4>
-      <p>60 Coins</p>
-    </div>
-
-    <div class="theme-card" onclick="buyTheme('rainbow', 80)">
-      <div class="theme-preview rainbow"></div>
-      <h4>🌈 Rainbow Candy</h4>
-      <p>80 Coins</p>
-    </div>
-
-    <div class="theme-card" onclick="buyTheme('neon', 100)">
-      <div class="theme-preview neon"></div>
-      <h4>💡 Neon Candy</h4>
-      <p>100 Coins</p>
-    </div>
-
-    <div class="theme-card" onclick="buyTheme('ice', 70)">
-      <div class="theme-preview ice"></div>
-      <h4>❄️ Ice Candy</h4>
-      <p>70 Coins</p>
-    </div>
-
-    <div class="theme-card" onclick="buyTheme('bubblegum', 60)">
-      <div class="theme-preview bubblegum"></div>
-      <h4>🍬 Bubblegum Candy</h4>
-      <p>60 Coins</p>
-    </div>
-
-  </div>
-</div>
 
 <div id="purchaseFeedback">
   <div id="purchaseFeedbackContent"></div>
@@ -227,4 +313,3 @@
 <script src="script.js"></script>
 </body>
 </html>
- 
