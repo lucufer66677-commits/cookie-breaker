@@ -1,4 +1,3 @@
-const menu = document.getElementById("menu");
 const game = document.getElementById("game");
 const resultBox = document.getElementById("resultBox");
 const resultText = document.getElementById("resultText");
@@ -27,6 +26,16 @@ const REWARD_STORAGE_KEY = "lastDailyRewardTime";
 let currentTheme = "dark";
 const THEME_STORAGE_KEY = "playerTheme";
 
+// 🖌️ THEME SHOP
+const THEME_PRICE = 200;
+let unlockedThemes = {};
+const UNLOCKED_THEMES_KEY = "unlockedThemes";
+const THEME_ITEMS = [
+  { id: "dark", name: "Dark", icon: "🌙", desc: "Classic dark theme" },
+  { id: "candy", name: "Candy", icon: "🍬", desc: "Colorful candy theme" },
+  { id: "bakery", name: "Bakery", icon: "🍰", desc: "Warm bakery theme" }
+];
+
 let bossHealth = 5;
 const BOSS_REWARD_COINS = 200;
 
@@ -34,6 +43,13 @@ const BOSS_REWARD_COINS = 200;
 const MAX_LIVES = 5;
 let bombCount = 0;
 const MAX_BOMBS = 3;
+
+// 🧲 MAGNET EFFECT VARIABLES
+let magnetActive = false;
+let magnetTimer = 0;
+const MAGNET_DURATION = 10; // seconds
+const MAGNET_PRICE = 200;
+
 let goldenCookieActive = false;
 const GOLDEN_COOKIE_PRICE = 300;
 const GOLDEN_COOKIE_SPAWN_CHANCE = 0.15; // 15% chance per spawn
@@ -66,6 +82,15 @@ const SHOP_ITEMS = [
     effect: "Rare golden cookies with bonus",
     purchase: purchaseGoldenCookie,
     canPurchase: canPurchaseGoldenCookie
+  },
+  {
+    id: "magnet",
+    name: "Cookie Magnet",
+    icon: "🧲",
+    price: MAGNET_PRICE,
+    effect: `Draws cookies closer for ${MAGNET_DURATION}s`,
+    purchase: purchaseMagnet,
+    canPurchase: canPurchaseMagnet
   }
 ];
 
@@ -113,6 +138,51 @@ function purchaseGoldenCookie() {
   return true;
 }
 
+function canPurchaseMagnet() {
+  // magnet can always be purchased (effect can be reactivated)
+  return true;
+}
+
+function purchaseMagnet() {
+  if (coins < MAGNET_PRICE) return false;
+  coins -= MAGNET_PRICE;
+  saveCoins();
+  activateMagnet();
+  showPurchaseFeedback("🧲 Magnet Activated!", "#00FFFF");
+  renderShopItems();
+  return true;
+}
+
+let magnetInterval = null;
+
+function activateMagnet() {
+  magnetActive = true;
+  magnetTimer = MAGNET_DURATION;
+  updateMagnetDisplay();
+  applyMagnetClass();
+  if (magnetInterval) clearInterval(magnetInterval);
+  magnetInterval = setInterval(() => {
+    magnetTimer--;
+    updateMagnetDisplay();
+    if (magnetTimer <= 0) {
+      clearInterval(magnetInterval);
+      magnetActive = false;
+      removeMagnetClass();
+      updateMagnetDisplay();
+    }
+  }, 1000);
+}
+
+function applyMagnetClass() {
+  document.querySelectorAll(".item.cookie, .item.cake, .item.bread").forEach(el => {
+    el.classList.add("magnet-item");
+  });
+}
+
+function removeMagnetClass() {
+  document.querySelectorAll(".magnet-item").forEach(el => el.classList.remove("magnet-item"));
+}
+
 function updateBombDisplay() {
   const bombDisplay = document.getElementById("bombDisplay");
   const bombBtn = document.getElementById("bombBtn");
@@ -126,6 +196,19 @@ function updateBombDisplay() {
   } else {
     bombDisplay.style.display = "none";
     bombBtn.style.display = "none";
+  }
+}
+
+function updateMagnetDisplay() {
+  const magnetDisplay = document.getElementById("magnetDisplay");
+  const magnetTimerSpan = document.getElementById("magnetTimer");
+  
+  magnetTimerSpan.innerText = magnetTimer;
+  
+  if (magnetActive && gameStarted) {
+    magnetDisplay.style.display = "block";
+  } else {
+    magnetDisplay.style.display = "none";
   }
 }
 
@@ -336,6 +419,11 @@ function loadCoins() {
 function saveCoins() {
   localStorage.setItem("playerCoins", coins);
   document.getElementById("coins").innerText = coins;
+  // update shop displays if open
+  if (document.getElementById("shopBox").style.display === "flex") {
+    renderShopItems();
+    renderThemeItems();
+  }
 }
 
 function checkDailyReward() {
@@ -396,11 +484,73 @@ function applyTheme(theme) {
   document.body.className = theme + "-theme";
   currentTheme = theme;
   localStorage.setItem(THEME_STORAGE_KEY, theme);
+  renderThemeItems(); // update highlight in shop if open
+}
+
+function loadUnlockedThemes() {
+  const saved = localStorage.getItem(UNLOCKED_THEMES_KEY);
+  unlockedThemes = saved ? JSON.parse(saved) : { dark: true }; // dark free by default
+}
+
+function saveUnlockedThemes() {
+  localStorage.setItem(UNLOCKED_THEMES_KEY, JSON.stringify(unlockedThemes));
+}
+
+function renderThemeItems() {
+  const grid = document.getElementById("themeItemsGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  THEME_ITEMS.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "shop-card";
+    const unlocked = !!unlockedThemes[item.id];
+    const canBuy = !unlocked && coins >= THEME_PRICE;
+    if (!unlocked) {
+      card.classList.add("disabled");
+    }
+    if (canBuy) {
+      card.classList.add("purchasable");
+    }
+    if (unlocked && currentTheme === item.id) {
+      card.classList.add("current-theme");
+    }
+    
+    card.innerHTML = `
+      <div class="shop-card-icon">${item.icon}</div>
+      <div class="shop-card-name">${item.name}</div>
+      <div class="shop-card-effect">${item.desc}</div>
+      <div class="shop-card-price">${unlocked ? 'OWNED' : '💰 ' + THEME_PRICE}</div>
+      <button class="shop-card-btn ${unlocked ? 'disabled' : (canBuy ? 'purchasable' : '')}"
+              onclick="purchaseTheme('${item.id}')"
+              ${unlocked || !canBuy ? 'disabled' : ''}>
+        ${unlocked ? 'OWNED' : (canBuy ? 'BUY' : 'NEED ' + (THEME_PRICE - coins))}
+      </button>
+    `;
+    
+    grid.appendChild(card);
+  });
+}
+
+function purchaseTheme(themeId) {
+  if (unlockedThemes[themeId]) return;
+  if (coins < THEME_PRICE) {
+    showPurchaseFeedback("Not enough coins!", "#FFB347");
+    return;
+  }
+  coins -= THEME_PRICE;
+  saveCoins();
+  unlockedThemes[themeId] = true;
+  saveUnlockedThemes();
+  renderThemeItems();
+  // automatically apply when purchased
+  applyTheme(themeId);
+  showPurchaseFeedback(`${themeId.charAt(0).toUpperCase()+themeId.slice(1)} theme unlocked!`, "#FFD700");
 }
 
 function openShop() {
   document.getElementById("shopBox").style.display = "flex";
   renderShopItems();
+  renderThemeItems();
   switchShopTab("items");
 }
 
@@ -409,6 +559,10 @@ function closeShop() {
 }
 
 function setTheme(theme) {
+  if (!unlockedThemes[theme]) {
+    showPurchaseFeedback("Theme not unlocked!", "#FFB347");
+    return;
+  }
   applyTheme(theme);
 }
 // 🔥 COMBO SYSTEM
@@ -515,6 +669,39 @@ function triggerShake() {
   void game.offsetWidth; // Force reflow to restart animation
   game.classList.add("shake");
   setTimeout(() => game.classList.remove("shake"), 200);
+}
+
+// ⚠️ DANGER WARNING
+function showDangerWarning() {
+  const warning = document.createElement("div");
+  warning.id = "dangerWarning";
+  warning.textContent = "⚠️ DANGER!";
+  document.body.appendChild(warning);
+  triggerShake();
+  dangerSound();
+  // remove after delay and then show game over result
+  setTimeout(() => {
+    warning.remove();
+    showResult("💀 GAME OVER");
+  }, 2500);
+}
+
+function dangerSound() {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    // dramatic low rumble
+    o.frequency.setValueAtTime(150, now);
+    o.frequency.exponentialRampToValueAtTime(40, now + 0.5);
+    g.gain.setValueAtTime(0.8, now);
+    g.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(now + 0.5);
+  } catch (e) {}
 }
 
 // 🎆 PARTICLE BURST EFFECT
@@ -667,17 +854,6 @@ function sizzleSound() {
   } catch (e) {}
 }
 
-// 🔒 LEVEL BUTTONS
-for (let i = 1; i <= 20; i++) {
-  const b = document.createElement("button");
-  b.innerText = i;
-  b.className = i === 1 ? "unlocked" : "locked";
-  b.onclick = () => i <= unlockedLevel && startLevel(i, false);
-  menu.appendChild(b);
-}
-
-// Level menu removed - using side panel instead
-
 // ⏱️ TIMER
 function startTimer() {
   clearInterval(timer);
@@ -689,6 +865,29 @@ function startTimer() {
     document.getElementById("time").innerText = timeLeft;
     if (timeLeft <= 0) loseLife("⏱️ TIME UP!");
   }, 1000);
+}
+
+// 📖 HOW TO PLAY INTRODUCTION SCREEN
+function showHowToPlay() {
+  const howToPlayBox = document.getElementById("howToPlayBox");
+  howToPlayBox.style.display = "flex";
+  howToPlayBox.classList.remove("hidden");
+}
+
+function hideHowToPlay() {
+  const howToPlayBox = document.getElementById("howToPlayBox");
+  howToPlayBox.classList.add("fadeOutOverlay");
+  setTimeout(() => {
+    howToPlayBox.style.display = "none";
+    howToPlayBox.classList.remove("fadeOutOverlay");
+  }, 400);
+}
+
+function startFromHowToPlay() {
+  hideHowToPlay();
+  setTimeout(() => {
+    showDifficulty();
+  }, 400);
 }
 
 // 🎯 DIFFICULTY SELECTION
@@ -734,6 +933,14 @@ function startLevel(level, resetLives) {
   resetCombo();
   if (resetLives) lives = initialLives;
   
+  // custom Round 1 adjustments
+  if (level === 1) {
+    lives = 2; // start with 2 hearts
+    targetCookies = 15; // start cookie count 15
+    document.getElementById("lives").innerText = lives;
+    document.getElementById("target").innerText = targetCookies;
+  }
+  
   // Update unlocked level
   unlockedLevel = Math.max(unlockedLevel, level);
 
@@ -741,7 +948,7 @@ function startLevel(level, resetLives) {
   if (level === 10) {
     targetCookies = 1; // Only need to defeat boss
     document.getElementById("target").innerText = "BOSS";
-  } else {
+  } else if (level !== 1) {
     targetCookies = 2 + level; // 🔥 TARGET INCREASES
     document.getElementById("target").innerText = targetCookies;
   }
@@ -750,8 +957,9 @@ function startLevel(level, resetLives) {
   document.getElementById("missed").innerText = missed;
   document.getElementById("lives").innerText = lives;
 
-  // Show bomb display if bombs are available
+  // Show bomb/magnet displays
   updateBombDisplay();
+  updateMagnetDisplay();
 
   startTimer();
   spawnItems();
@@ -792,7 +1000,8 @@ function loseLife(msg, showPopup = true) {
 
   if (lives <= 0) {
     lastResult = "gameover";
-    showResult("💀 GAME OVER");
+    // show warning then game over
+    showDangerWarning();
   } else if (showPopup) {
     lastResult = "retry";
     showResult(msg);
@@ -832,9 +1041,16 @@ function spawnItems() {  // Boss level at level 10
       const itemSize = Math.min(80, window.innerWidth * 0.08);
 
       item.className = "item " + itemData.type;
+      if (isGood && magnetActive) {
+        item.classList.add("magnet-item");
+      }
       item.textContent = itemData.emoji;
       item.style.left = Math.random() * (window.innerWidth - itemSize) + "px";
-      item.style.animationDuration = speed + "ms";
+      let animDur = speed;
+      if (isGood && magnetActive) {
+        animDur = speed * 1.2; // slow down slightly when magnet is active
+      }
+      item.style.animationDuration = animDur + "ms";
 
       item.onclick = () => {
         taps++;
@@ -957,7 +1173,7 @@ function createGoldenParticles(x, y) {
     
     const angle = (i / particleCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
     const distance = 60 + Math.random() * 150;
-    const tx = Math.cos(angle) * distance;
+  const tx = Math.cos(angle) * distance;
     const ty = Math.sin(angle) * distance - 40;
     
     const fontSize = 14 + Math.random() * 18;
@@ -1144,7 +1360,9 @@ document.getElementById("levelPanel").addEventListener("click", (e) => {
   }
 });
 
-document.getElementById("instructionsBox").style.display = "flex";
+// Show "How To Play" introduction screen on page load
+showHowToPlay();
+document.getElementById("instructionsBox").style.display = "none";
 
 // Initialize coins and check daily reward
 loadCoins();
@@ -1152,25 +1370,9 @@ checkDailyReward();
 
 // Initialize theme
 loadTheme();
+// Load which themes are unlocked
+loadUnlockedThemes();
 
 // Initialize level grid
 renderLevelGrid();
-let gamePaused = false;
-let gameInterval = null; // agar tum setInterval use kar rahe ho
 
-function pauseGame() {
-  gamePaused = true;
-
-  // intervals stop
-  if (gameInterval) {
-    clearInterval(gameInterval);
-    gameInterval = null;
-  }
-}
-
-function resumeGame() {
-  if (!gamePaused) return;
-
-  gamePaused = false;
-  startGameLoop(); // tumhara existing game loop yahin se chale
-}
